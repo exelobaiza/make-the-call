@@ -1,0 +1,82 @@
+/*
+ * Design tokens. Names mirror the Figma variables one to one
+ * (surface/card → --color-surface-card → bg-surface-card).
+ * Spacing uses Tailwind's 4px scale, which matches Figma's space/N (p-4 = space/16).
+ */
+@theme static {
+  --color-surface-bg: #f4f4f2;
+  --color-surface-card: #ffffff;
+  --color-surface-selected: #0d0d0d0d;
+
+  --color-border-default: #e2e2df;
+  --color-border-strong: #c9c9c4;
+
+  --color-text-primary: #0d0d0d;
+  --color-text-secondary: #3d3d3d;
+  --color-text-tertiary: #666666;
+
+  --color-action-active: #0d0d0d;
+
+  --color-status-go-fill: #22c55e;
+  --color-status-warn-fill: #facc15;
+  --color-status-no-fill: #ff002e;
+  --color-status-go-text: #166534;
+  --color-status-warn-text: #854d0e;
+  --color-status-no-text: #b0001f;
+
+  /*
+   * Verdict block. These are raw hexes in the Figma (not variables), read off
+   * the frames: the fill is the tint, the border is the status colour.
+   */
+  --color-status-go-bg: #def6e7;
+  --color-status-warn-bg: #fef7dc;
+  --color-status-no-bg: #ffd9e0;
+  --color-status-go-border: #166534;
+  --color-status-warn-border: #854d0e;
+  --color-status-no-border: #b0001f;
+
+  /* Tide chart. Flat hexes in the Figma; the fill has to stay translucent to sit over the bands. */
+  --color-tide-closed: #fef5d3;
+  --color-tide-fill: rgb(13 13 13 / 0.06);
+  /* Amber that stays legible on a white card — the Figma darkens the fill for light mode. */
+  --color-chart-warn: #a16207;
+
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Oxanium", "Geist Mono", ui-monospace, monospace;
+
+  --breakpoint-tablet: 601px;
+  --breakpoint-desktop: 1024px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface-bg: #000000;
+    --color-surface-card: #0d0d0d;
+    --color-surface-selected: #e3e3e312;
+
+    --color-border-default: #e3e3e31f;
+    --color-border-strong: #e3e3e340;
+
+    --color-text-primary: #e3e3e3;
+    --color-text-secondary: #e3e3e3cc;
+    --color-text-tertiary: #8f8f8f;
+
+    --color-action-active: #e3e3e3;
+
+    --color-status-go-text: #4ade80;
+    --color-status-warn-text: #facc15;
+    --color-status-no-text: #ff3355;
+
+    --color-status-go-bg: #0f1f15;
+    --color-status-warn-bg: #25200e;
+    --color-status-no-bg: #250c10;
+    --color-tide-closed: #2e280e;
+    --color-tide-fill: rgb(227 227 227 / 0.08);
+    --color-chart-warn: #facc15;
+
+    /* In dark the status border is the fill colour, not the text one. */
+    --color-status-go-border: #22c55e;
+    --color-status-warn-border: #facc15;
+    --color-status-no-border: #ff002e;
+  }
+}

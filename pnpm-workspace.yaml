@@ -1,0 +1,3 @@
+# Allow esbuild (a Vite dependency) to run its install script.
+allowBuilds:
+  esbuild: true

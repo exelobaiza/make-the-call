@@ -1,0 +1,48 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.4;
+    background: var(--color-surface-bg);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Small uppercase labels: "TOMORROW · LESSON WINDOW", "TIDE". */
+@utility meta {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/*
+ * Two lengths of the same message (§4.7). Both are in the DOM and CSS picks one,
+ * so resizing never reflows and screen readers only reach the visible one.
+ */
+@layer components {
+  .long {
+    display: none;
+  }
+
+  @media (min-width: 601px) {
+    .short {
+      display: none;
+    }
+
+    .long {
+      display: revert;
+    }
+  }
+}
