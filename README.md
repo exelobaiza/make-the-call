@@ -1,9 +1,11 @@
+![Make the Call — Cracken design engineer take-home](public/og.jpg)
+
 # Make the Call
 
 One screen for Marta, who runs a kitesurf school, to decide tomorrow: **run beginner lessons or cancel.**
 
-- **Live:** TODO_DEPLOY_URL
-- **Design:** [Figma](https://www.figma.com/design/pjaw6bujRb0oqvBYU3yJIn/make-the-call?node-id=1-5)
+- **Live:** https://make-the-call.exelobaiza.dev/
+- **Design:** [Figma](https://www.figma.com/design/sYw1bToHQDlHJL3KluPpMr/make-the-call)
 
 The brief has one line that shaped everything: *she'll cancel if she's confident; what she can't stand is being unsure at seven.* So the screen never just answers — when it can't be sure, it still tells her what to do meanwhile.
 
@@ -25,14 +27,7 @@ pnpm dev        # http://localhost:5173
 
 ## What's on the screen
 
-Read in the order she decides: **answer → what she can adjust → evidence → fine print.**
-
-1. **A lesson window** (morning, midday, afternoon). Each one shows its own verdict and a one-line reason before she picks it, so she can see the alternative without opening anything.
-2. **The verdict** — the action first («Book the morning · recheck tomorrow 10:00»), then the word and the single number that decides it («UNSURE · wind 9–20 gusting 31»), then the four gates (direction, tide, waves, wind), then the kit to load.
-3. **One hour at a time**, if the window-level answer isn't enough.
-4. **A live row** that says what just changed and whether it changes the call.
-5. **Cards** — tide (with the curve), waves, wind, air — in the order the gates are checked.
-6. **An hour-by-hour table** with every forecast, for when she doesn't trust the summary.
+Read in the order she decides: **answer → what she can adjust → evidence → fine print.** A lesson window with its verdict and the action to take, the kit to load, a live row for what just changed, one card per condition, and an hour-by-hour table for when she doesn't trust the summary.
 
 ## The two things that can't be skipped
 
@@ -42,7 +37,6 @@ Read in the order she decides: **answer → what she can adjust → evidence →
 - Loading is the same layout with em dashes where the numbers go — not a different skeleton — so the swap can't reflow anything.
 - Numbers are monospaced, so a digit changing doesn't push its neighbours.
 - "Just updated" lives in a fixed row, and the highlights are a **border colour** and an **outline**, neither of which takes space.
-- The one place this got interesting: between 601px and 833px the long "what changed" sentence wraps to two lines, which would make the row change height between revisions. That range uses the short wording instead.
 
 **It says the forecasts disagree, without teaching her what a model is.** It counts heads: «2/5 Steady · 2/5 Too gusty · 1/5 Too light», with a bar per row. Never a model name — "One forecast raised its 17:00 gusts", not "ICON". No percentages either: "2 of 5 forecasts" needs no statistics.
 
@@ -57,11 +51,9 @@ The rule: **if it doesn't change tomorrow's call, it's not on the main screen.**
 | Spot and day pickers | One school, one beach, one question: tomorrow. |
 | Custom hour ranges | The three windows come from where conditions actually change (the tide closes midday, the forecasts split in the afternoon). Less freedom, one click to the answer. |
 | Percentages and probabilities | "2 of 5 forecasts" is understood without statistics. |
-| Editing the rules in the UI | They live in one file (`domain/rules.ts`); changing one is changing a number. A settings screen is a different product. |
 | Wave period on the card | Doesn't change the call for beginners. Stays in the table as reference. |
-| Showing stale data on error | A stale GO is more dangerous than no screen: *"Nothing is shown rather than an old forecast."* |
+| Showing stale data on error | A stale GO is more dangerous than no screen, so the error state shows nothing rather than an old forecast. |
 | Toasts, push, change history | A toast covers or pushes. The live row says what changed in a fixed place, which is what the no-jump rule allows. |
-| URL state (`?window=afternoon`) | A real improvement — shareable links, working back button — but not a priority in the budget. First thing I'd add. |
 
 ## Assumptions
 
@@ -70,7 +62,7 @@ The brief gives some thresholds and leaves others open. All of them live in [`sr
 | Rule | Value | Source |
 |---|---|---|
 | Wind range for a lesson | 12–25 kn | brief |
-| Gust gap that makes it unteachable | 10 kn over the average | **mine** — the brief says the gap matters more than either number, not where the line is. Conservative for beginners; Marta can raise it. |
+| Gust gap that makes it unteachable | 10 kn over the average | **mine** — the brief says the gap matters more than either number, not where the line is. Conservative for beginners; one number to change in `rules.ts`. |
 | Wave limit | 1 m | brief |
 | Low tide closes the lesson zone | under 0.5 m | **mine** — the brief says the sandbar shows at low tide, not at what height |
 | The beach faces | west (270°) | **mine** — spot setting |
@@ -88,50 +80,21 @@ Some copy is derived rather than taken from the Figma: the reasons under each wi
 
 ## How it's built
 
-Four layers, each one only talking to the next:
-
-```
-source/     an adapter — today the mock, tomorrow an API or a socket
-domain/     pure functions: data in, decisions and the words for them out
-state/      one hook: loads, subscribes, applies revisions, compares verdicts
-components/ draw, and nothing else
-```
-
-The verdict is **derived state**: it's never stored, it's computed from the data, so it can't say GO while the data says NO-GO. Live revisions go through a reducer that applies one cell immutably and compares the three windows' verdicts before and after — that's where "Still unsure." vs "Afternoon is now a no-go." comes from.
-
-**35 tests** on the domain and the reducer (`pnpm test`): the three windows, the edge of every threshold, a smaller dataset, what the live row says, and the tide chart's geometry.
-
-### Switching to a real API
-
-One file. [`src/source/types.ts`](src/source/types.ts) is the whole contract:
-
-```ts
-export interface ForecastSource {
-  load(): Promise<Forecast>;
-  subscribe(onUpdate: (update: ForecastUpdate) => void): Unsubscribe;
-}
-```
-
-Write an adapter that fetches and maps the response to `Forecast`, opens a WebSocket in `subscribe`, and change one line in `App.tsx`. Nothing in `domain/`, `state/` or `components/` knows the difference. At that point I'd add zod validation at the boundary, reconnection with backoff, and sequence numbers to drop out-of-order updates.
-
-### Not tied to this dataset
-
-Nothing counts to five. The screen counts whatever forecasts it gets — seven models say "4/7" — windows are resolved by hour label against the data, lookups are by hour and never by position, and the tide curve scales from the day's own maximum. There's a test running everything against a smaller dataset (3 atmospheric models, 1 wave model, fewer hours).
+Four layers — `source/` (the mock today, an API or socket tomorrow, behind one interface in [`src/source/types.ts`](src/source/types.ts)), `domain/` (pure functions that decide and word the decision), `state/` (one hook that loads, subscribes and compares verdicts) and `components/` (draw, nothing else). The verdict is derived, never stored, so it can't disagree with the data. Nothing assumes this dataset: forecasts are counted, not fixed at five, and there's a test against a smaller one. **35 tests** on the domain and the reducer.
 
 ## Accessibility
 
-- Native elements first: `<button>`, `<table>` with `scope` on its headers. The window picker is a disclosure with real buttons, not a hand-rolled listbox — a correct ARIA listbox needs roving tabindex and arrow keys, and `role="option"` on a button inside an `li` is invalid anyway.
-- The status icons are decorative; each gate carries its state as text for screen readers ("Direction passes").
-- The tide curve is `role="img"` with a sentence describing the day: *"Tide: 2.5 m at 07:00, low of 0.3 m at 13:00… Lesson zone closed under 0.5 m, around 12:00 to 14:00."* Built from the same data that draws it.
-- Only the "what changed" text is a live region. The clock is deliberately outside it, so it doesn't announce every second.
-- Dark mode follows the system; it's the same tokens with different values, no JavaScript.
+- Native elements first: `<button>`, a real `<table>` with `scope` on its headers.
+- The tide curve is `role="img"` with a sentence describing the day, built from the same data that draws it.
+- Only the "what changed" text is a live region; the clock stays outside it so it doesn't announce every second.
 
 ## Time
 
-TODO_TIME_SPENT
+About 6 hours, spread over three days (~2h a day). The build itself fit roughly in the suggested 3–4; the rest went into research and into trying different options and scenarios for Marta before settling on this one.
 
 ## Known gaps
 
+- URL state (`?window=afternoon`) for shareable links and a working back button. First thing I'd add.
 - Keyboard focus isn't trapped inside the mobile drawer.
-- Tests cover the domain and the reducer; the hook's effects (cancelled loads, subscription cleanup) would need Testing Library with a fake source. First test debt I'd pay.
+- Tests cover the domain and the reducer; the hook's effects (cancelled loads, subscription cleanup) would need Testing Library with a fake source.
 - `?slow` and `?fail` are read once, at load.
