@@ -1,4 +1,4 @@
-![Make the Call — Cracken design engineer take-home](public/og.jpg)
+![Make the Call: go/no-go forecast for a kite instructor](public/og.jpg)
 
 # Make the Call
 
@@ -7,7 +7,7 @@ One screen for Marta, who runs a kitesurf school, to decide tomorrow: **run begi
 - **Live:** https://make-the-call.exelobaiza.dev/
 - **Design:** [Figma](https://www.figma.com/design/sYw1bToHQDlHJL3KluPpMr/make-the-call)
 
-The brief has one line that shaped everything: *she'll cancel if she's confident; what she can't stand is being unsure at seven.* So the screen never just answers — when it can't be sure, it still tells her what to do meanwhile.
+The requirements have one line that shaped everything: *she'll cancel if she's confident; what she can't stand is being unsure at seven.* So the screen never just answers — when it can't be sure, it still tells her what to do meanwhile.
 
 ## Running it
 
@@ -46,7 +46,7 @@ The rule: **if it doesn't change tomorrow's call, it's not on the main screen.**
 
 | Cut | Why |
 |---|---|
-| Model names (ECMWF, ICON…) | She doesn't care which one says what, only how many agree. The brief says not to teach her what a model is. |
+| Model names (ECMWF, ICON…) | She doesn't care which one says what, only how many agree. The requirements say not to teach her what a model is. |
 | Rain and cloud | They don't change the call. Said once, in the footer. |
 | Spot and day pickers | One school, one beach, one question: tomorrow. |
 | Custom hour ranges | The three windows come from where conditions actually change (the tide closes midday, the forecasts split in the afternoon). Less freedom, one click to the answer. |
@@ -57,17 +57,17 @@ The rule: **if it doesn't change tomorrow's call, it's not on the main screen.**
 
 ## Assumptions
 
-The brief gives some thresholds and leaves others open. All of them live in [`src/domain/rules.ts`](src/domain/rules.ts), each marked as *brief* or *mine*:
+The requirements give some thresholds and leave others open. All of them live in [`src/domain/rules.ts`](src/domain/rules.ts), each marked as *requirements* or *mine*:
 
 | Rule | Value | Source |
 |---|---|---|
-| Wind range for a lesson | 12–25 kn | brief |
-| Gust gap that makes it unteachable | 10 kn over the average | **mine** — the brief says the gap matters more than either number, not where the line is. Conservative for beginners; one number to change in `rules.ts`. |
-| Wave limit | 1 m | brief |
-| Low tide closes the lesson zone | under 0.5 m | **mine** — the brief says the sandbar shows at low tide, not at what height |
+| Wind range for a lesson | 12–25 kn | requirements |
+| Gust gap that makes it unteachable | 10 kn over the average | **mine** — the requirements say the gap matters more than either number, not where the line is. Conservative for beginners; one number to change in `rules.ts`. |
+| Wave limit | 1 m | requirements |
+| Low tide closes the lesson zone | under 0.5 m | **mine** — the requirements say the sandbar shows at low tide, not at what height |
 | The beach faces | west (270°) | **mine** — spot setting |
 | Direction | within 70° of onshore passes, 70–90° is borderline, beyond that it blows offshore | **mine** |
-| Full wetsuit | under 16 °C | threshold **mine**; the brief asks for the wetsuit call |
+| Full wetsuit | under 16 °C | threshold **mine**; the requirements ask for the wetsuit call |
 | Kite size | by gust midpoint, ~75 kg rider, one size down under 15 °C | **mine** |
 | Recheck time | 10:00 | **mine** — when the morning runs update, the afternoon is clearer |
 
